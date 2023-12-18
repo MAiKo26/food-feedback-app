@@ -9,21 +9,27 @@ import {CardContent, Card} from "@/components/ui/card";
 import {useEffect, useState} from "react";
 
 export function UpvoteComponent({items, setItems}: any) {
-  const [votedArray, setVotedArray] = useState(
-    new Array(items.length).fill(false)
+  const items2 = items.slice().sort((a: any, b: any) => b.score - a.score);
+
+  // Initialize votedArray from localStorage or with all false values
+  const initialVotedArray = JSON.parse(
+    (typeof window !== "undefined" && localStorage.getItem("votedArray")) ||
+      "[]"
   );
+  const [votedArray, setVotedArray] = useState<boolean[]>(initialVotedArray);
 
   const handleUpvote = async (index: number) => {
     if (votedArray[index]) {
       return;
     }
+
     // Create a new array with the updated score
     const updatedItems = [...items];
     updatedItems[index] = {...items[index], score: items[index].score + 1};
 
     // Use setItems to update the entire items array
     setItems(updatedItems);
-    // orderItemsByScore();
+
     try {
       const response = await fetch("/api/item", {
         method: "PUT",
@@ -32,8 +38,7 @@ export function UpvoteComponent({items, setItems}: any) {
         },
         body: JSON.stringify(updatedItems[index]),
       });
-      console.log(updatedItems[index]);
-      console.log(response);
+
       if (response.ok) {
         console.log("Data modified successfully!");
         // You can perform additional actions here after successful submission
@@ -45,19 +50,28 @@ export function UpvoteComponent({items, setItems}: any) {
       console.error("An error occurred:", error);
       // Handle other types of errors here
     }
+
+    // Update votedArray in state and localStorage
+    setVotedArray((prevVotedArray) => {
+      const updatedVotedArray = [...prevVotedArray];
+      updatedVotedArray[index] = true;
+      localStorage.setItem("votedArray", JSON.stringify(updatedVotedArray));
+      return updatedVotedArray;
+    });
   };
 
   const handleDownvote = async (index: number) => {
     if (votedArray[index]) {
       return;
     }
+
     // Create a new array with the updated score
     const updatedItems = [...items];
     updatedItems[index] = {...items[index], score: items[index].score - 1};
 
     // Use setItems to update the entire items array
     setItems(updatedItems);
-    console.log(updatedItems);
+
     try {
       const response = await fetch("/api/item", {
         method: "PUT",
@@ -68,19 +82,27 @@ export function UpvoteComponent({items, setItems}: any) {
       });
 
       if (response.ok) {
-        console.log("Data submitted successfully!");
+        console.log("Data modified successfully!");
         // You can perform additional actions here after successful submission
       } else {
-        console.error("Failed to submit data. Status:", response.status);
+        console.error("Failed to modify data. Status:", response.status);
         // You can handle error cases here
       }
     } catch (error) {
       console.error("An error occurred:", error);
       // Handle other types of errors here
     }
+
+    // Update votedArray in state and localStorage
+    setVotedArray((prevVotedArray) => {
+      const updatedVotedArray = [...prevVotedArray];
+      updatedVotedArray[index] = true;
+      localStorage.setItem("votedArray", JSON.stringify(updatedVotedArray));
+      return updatedVotedArray;
+    });
   };
 
-  return items.map((item: any, index: number) => (
+  return items2.map((item: any, index: number) => (
     <Card className="p-4 mb-4 border-gray-200 shadow-lg" key={index}>
       <CardContent className="flex flex-row gap-4 justify-start items-center">
         <div className="flex flex-col items-center">

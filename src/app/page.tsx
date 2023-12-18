@@ -1,4 +1,5 @@
 "use client";
+import {redirect} from "next/navigation";
 import fetchData from "@/components/component/fetchData";
 import {SuggestionComponent} from "@/components/component/suggestion-component";
 import {UpvoteComponent} from "@/components/component/upvote-component";
@@ -6,6 +7,8 @@ import Image from "next/image";
 import {useState, useEffect} from "react";
 
 export default function Home() {
+  redirect("/liste-sugg");
+
   const date = new Date();
   const dateToday =
     date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
